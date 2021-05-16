@@ -17,7 +17,7 @@ Update time: 2021-05-13 13:11:46.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from multiclassnn import readData, neuralNetwork, softmax_a
+from multiclassnn import readData, neuralNetwork, softmax_a, plotResult
 
 
 # ---------------------Globals---------------------
@@ -44,14 +44,18 @@ if __name__ == '__main__':
                        af_last=softmax_a, lam=LAMBDA)
 
     # -----------------Mini-batch train-----------------
+    nn.plotNN()
     nn.loadWeights('./weights.npz')
 
+    import time
+    t1=time.time()
     costs = nn.miniBatchTrain(x_data, y_data, EPOCHS, 64)
+    t2=time.time()
+    print('time=',t2-t1)
     #costs = nn.batchTrain(x_data, y_data, EPOCHS)
     #costs = nn.stochasticTrain(x_data, y_data, EPOCHS)
 
     # -----------Plot a graph of the network-----------
-    nn.plotNN()
     fig, ax = plt.subplots()
     ax.plot(costs, 'b-o')
     ax.set_xlabel('epochs')
@@ -89,3 +93,19 @@ if __name__ == '__main__':
 
     print('Accuracy in training set:', n_correct_train/float(len(x_data))*100.)
     print('Accuracy in test set:', n_correct_test/float(len(x_data_test))*100.)
+
+    #----------------Plot some results----------------
+    nrows = 3
+    ncols = 4
+    n_plots =  nrows*ncols
+    fig = plt.figure(figsize=(12, 10))
+    for i in range(n_plots):
+        axi = fig.add_subplot(nrows, ncols, i+1)
+        axi.axis('off')
+        xi = x_data_test[i]
+        yi = y_data_test[i]
+        yhati = yhat_test[i]
+        plotResult(xi, yi, yhati, ax=axi)
+
+    fig.show()
+

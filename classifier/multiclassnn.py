@@ -50,20 +50,24 @@ def readData(path):
     return x_data, y_data
 
 
-def plotResult(x_data, y_data, yhat):
+def plotResult(x_data, y_data, yhat, ax=None):
     '''Plot an image and prediction
 
     Args:
         x_data (ndarray): input image array in shape (784,).
         y_data (ndarray): mnist label array in shape (10,).
         yhat (int): predicted digit.
+    Keyword Args:
+        ax (matplotlib axis): if None, create a new.
     '''
-    fig, ax = plt.subplots()
+    if ax is None:
+        fig, ax = plt.subplots()
     nl = int(np.sqrt(x_data.size))
     img = x_data.reshape(nl, nl)
     ax.imshow(img)
     ax.set_title('Input = %d, predict = %d' % (int(np.argmax(y_data)), yhat))
-    fig.show()
+    if ax is None:
+        fig.show()
 
     return
 
@@ -72,8 +76,7 @@ def crossEntropy(yhat, y):
     '''Cross entropy cost function '''
     eps = 1e-10
     yhat = np.clip(yhat, eps, 1-eps)
-    aa = y*np.log(yhat)
-    return -np.nansum(aa)
+    return -np.nansum(y*np.log(yhat))
 
 
 def dlogistic(x):
@@ -153,11 +156,11 @@ class neuralNetwork(object):
         for ii in range(1, self.n_layers):
             if self.init_func == 'xavier':
                 stdii = np.sqrt(6/(self.n_nodes[ii-1]+self.n_nodes[ii]))
+                thetaii = (np.random.rand(self.n_nodes[ii], self.n_nodes[ii-1]) - 0.5) * stdii
             elif self.init_func == 'he':
                 stdii = np.sqrt(2/self.n_nodes[ii-1])
-
-            thetaii = np.random.normal(0, stdii, size=(
-                self.n_nodes[ii], self.n_nodes[ii-1]))
+                thetaii = np.random.normal(0, stdii, size=(self.n_nodes[ii],
+                    self.n_nodes[ii-1]))
 
             self.thetas[ii] = thetaii
             self.biases[ii] = np.zeros([1, self.n_nodes[ii]])
@@ -198,7 +201,7 @@ class neuralNetwork(object):
         a1 = x
         for ii in range(1, self.n_layers):
             bii = self.biases[ii]
-            zii = np.dot(a1, self.thetas[ii].T)+bii
+            zii = np.einsum('ij,kj->ik', a1, self.thetas[ii]) + bii
             if ii == self.n_layers-1:
                 aii = self.af_last(zii)
             else:
@@ -261,8 +264,8 @@ class neuralNetwork(object):
             grads[jj] = np.einsum('ij,ik->jk', delta, activations[jj-1])
             grads_bias[jj] = np.sum(delta, axis=0, keepdims=True)
             if jj != 1:
-                delta = np.dot(
-                    delta, self.thetas[jj])*self.daf(weight_sums[jj-1])
+                delta = np.einsum('ij,jk->ik', delta, self.thetas[jj]) *\
+                        self.daf(weight_sums[jj-1])
 
         return grads, grads_bias
 
@@ -540,9 +543,10 @@ class neuralNetwork(object):
             pos.update(dict(zip(nodesll, posll)))
 
         #-------------------Draw figure-------------------
-        fig = plt.figure()
+        fig = plt.figure(figsize=(12,12))
         ax = fig.add_subplot(111)
-        nx.draw(self.graph, pos=pos, ax=ax, with_labels=True)
+        nx.draw(self.graph, pos=pos, ax=ax, node_size=1200, with_labels=True,
+                node_color='c', alpha=0.7)
         plt.show(block=False)
 
         return
