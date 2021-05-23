@@ -14,7 +14,7 @@ Each network type will have:
 * A Python implementation using `numpy` + `scipy`.
 * An example application of the network.
 
-### 1. A 5-layer dense network for hand-written digit classification
+### 1. A 5-layer multilayer perceptron network for hand-written digit classification
 
 ### 2. A 5-layer convolutional neural network for hand-written digit classification
 
