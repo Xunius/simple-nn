@@ -25,9 +25,9 @@ from utils import readMNIST
 TRAIN_DATA_FILE = '/home/guangzhi/datasets/mnist/mnist_train.csv'
 TEST_DATA_FILE = '/home/guangzhi/datasets/mnist/mnist_test.csv'
 
-LEARNING_RATE = 0.01            # initial learning rate
+LEARNING_RATE = 0.1            # initial learning rate
 LAMBDA = 0.01                  # regularization parameter
-EPOCHS = 4                    # training epochs
+EPOCHS = 50                    # training epochs
 
 
 softmax_a = partial(softmax, axis=1)
@@ -104,4 +104,6 @@ if __name__ == '__main__':
     figure = plt.figure(figsize=(12, 10), dpi=100)
     ax = figure.add_subplot(111)
     ax.plot(costs)
+    ax.set_xlabel('epochs')
+    ax.set_ylabel('cost')
     figure.show()
